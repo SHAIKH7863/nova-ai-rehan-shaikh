@@ -9,12 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PapersRouteImport } from './routes/papers'
+import { Route as FocusRouteImport } from './routes/focus'
+import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatIndexRouteImport } from './routes/chat.index'
 import { Route as ChatThreadIdRouteImport } from './routes/chat.$threadId'
 import { Route as ApiGenerateRouteImport } from './routes/api/generate'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PapersRoute = PapersRouteImport.update({
+  id: '/papers',
+  path: '/papers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FocusRoute = FocusRouteImport.update({
+  id: '/focus',
+  path: '/focus',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookmarksRoute = BookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +79,12 @@ const ApiChatRoute = ApiChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/focus': typeof FocusRoute
+  '/papers': typeof PapersRoute
+  '/profile': typeof ProfileRoute
+  '/resources': typeof ResourcesRoute
+  '/tools': typeof ToolsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
@@ -50,6 +92,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/focus': typeof FocusRoute
+  '/papers': typeof PapersRoute
+  '/profile': typeof ProfileRoute
+  '/resources': typeof ResourcesRoute
+  '/tools': typeof ToolsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
@@ -58,6 +106,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/focus': typeof FocusRoute
+  '/papers': typeof PapersRoute
+  '/profile': typeof ProfileRoute
+  '/resources': typeof ResourcesRoute
+  '/tools': typeof ToolsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate': typeof ApiGenerateRoute
   '/chat/$threadId': typeof ChatThreadIdRoute
@@ -65,12 +119,40 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/api/generate' | '/chat/$threadId' | '/chat/'
+  fullPaths:
+    | '/'
+    | '/bookmarks'
+    | '/focus'
+    | '/papers'
+    | '/profile'
+    | '/resources'
+    | '/tools'
+    | '/api/chat'
+    | '/api/generate'
+    | '/chat/$threadId'
+    | '/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/api/generate' | '/chat/$threadId' | '/chat'
+  to:
+    | '/'
+    | '/bookmarks'
+    | '/focus'
+    | '/papers'
+    | '/profile'
+    | '/resources'
+    | '/tools'
+    | '/api/chat'
+    | '/api/generate'
+    | '/chat/$threadId'
+    | '/chat'
   id:
     | '__root__'
     | '/'
+    | '/bookmarks'
+    | '/focus'
+    | '/papers'
+    | '/profile'
+    | '/resources'
+    | '/tools'
     | '/api/chat'
     | '/api/generate'
     | '/chat/$threadId'
@@ -79,6 +161,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookmarksRoute: typeof BookmarksRoute
+  FocusRoute: typeof FocusRoute
+  PapersRoute: typeof PapersRoute
+  ProfileRoute: typeof ProfileRoute
+  ResourcesRoute: typeof ResourcesRoute
+  ToolsRoute: typeof ToolsRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiGenerateRoute: typeof ApiGenerateRoute
   ChatThreadIdRoute: typeof ChatThreadIdRoute
@@ -87,6 +175,48 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/papers': {
+      id: '/papers'
+      path: '/papers'
+      fullPath: '/papers'
+      preLoaderRoute: typeof PapersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/focus': {
+      id: '/focus'
+      path: '/focus'
+      fullPath: '/focus'
+      preLoaderRoute: typeof FocusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookmarks': {
+      id: '/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -127,6 +257,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookmarksRoute: BookmarksRoute,
+  FocusRoute: FocusRoute,
+  PapersRoute: PapersRoute,
+  ProfileRoute: ProfileRoute,
+  ResourcesRoute: ResourcesRoute,
+  ToolsRoute: ToolsRoute,
   ApiChatRoute: ApiChatRoute,
   ApiGenerateRoute: ApiGenerateRoute,
   ChatThreadIdRoute: ChatThreadIdRoute,
