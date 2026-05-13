@@ -130,7 +130,7 @@ export const Route = createFileRoute("/api/generate")({
               NOVA_SYSTEM_PROMPT +
               "\n\nReturn ONLY the structured data requested. Be specific, accurate, and helpful for Indian competitive exam students.",
             prompt,
-            experimental_output: Output.object({ schema: schemaMap[kind] }),
+            experimental_output: Output.object({ schema: schemaMap[kind] as never }),
           });
           return Response.json(experimental_output);
         } catch (e) {
