@@ -81,6 +81,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Nova AI by REHAN SHAIKH — premium AI study app for JEE, NEET, UPSC, SSC and all Indian competitive exams. Chat, resources, papers, flashcards, all free.",
       },
+      { property: "og:title", content: "Nova AI — Your Study Companion" },
+      { name: "twitter:title", content: "Nova AI — Your Study Companion" },
+      { name: "description", content: "NovaStudy AI: Ultimate Edition is a comprehensive AI-powered study assistant for students." },
+      { property: "og:description", content: "NovaStudy AI: Ultimate Edition is a comprehensive AI-powered study assistant for students." },
+      { name: "twitter:description", content: "NovaStudy AI: Ultimate Edition is a comprehensive AI-powered study assistant for students." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/z2LEKkUB7bhpAwNIzvrZh6uuAn13/social-images/social-1778672270773-1000069064.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/z2LEKkUB7bhpAwNIzvrZh6uuAn13/social-images/social-1778672270773-1000069064.webp" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
