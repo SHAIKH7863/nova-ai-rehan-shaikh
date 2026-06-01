@@ -52,8 +52,7 @@ const QuestionSchema = z.object({
 const FlashcardSchema = z.object({
   cards: z
     .array(z.object({ front: z.string(), back: z.string() }))
-    .min(6)
-    .max(20),
+    .min(1),
 });
 
 const FormulaSchema = z.object({
