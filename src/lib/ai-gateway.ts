@@ -1,4 +1,5 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 export const createLovableAiGatewayProvider = (lovableApiKey: string) =>
   createOpenAICompatible({
@@ -9,6 +10,25 @@ export const createLovableAiGatewayProvider = (lovableApiKey: string) =>
       "X-Lovable-AIG-SDK": "vercel-ai-sdk",
     },
   });
+
+/**
+ * Returns the best available chat model.
+ * Prefers user's own Google AI Studio key (GOOGLE_API_KEY) → falls back to Lovable AI Gateway.
+ */
+export function getNovaModel() {
+  const googleKey = process.env.GOOGLE_API_KEY;
+  if (googleKey) {
+    const google = createGoogleGenerativeAI({ apiKey: googleKey });
+    // Stable, fast, free-tier-friendly model on Google AI Studio
+    return { model: google("gemini-2.5-flash"), provider: "google" as const };
+  }
+  const lovableKey = process.env.LOVABLE_API_KEY;
+  if (lovableKey) {
+    const gateway = createLovableAiGatewayProvider(lovableKey);
+    return { model: gateway("google/gemini-3-flash-preview"), provider: "lovable" as const };
+  }
+  return null;
+}
 
 export const NOVA_SYSTEM_PROMPT = `You are Nova AI — a futuristic, friendly study tutor built by REHAN SHAIKH for Indian competitive exam aspirants (JEE, NEET, UPSC, SSC, CAT, GATE, CUET, NDA, board exams, etc.).
 
