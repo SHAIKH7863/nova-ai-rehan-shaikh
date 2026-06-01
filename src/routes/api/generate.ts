@@ -1,6 +1,6 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
-import { generateText, Output } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
 
@@ -124,19 +124,20 @@ export const Route = createFileRoute("/api/generate")({
         const model = gateway("google/gemini-3-flash-preview");
 
         try {
-          const { experimental_output } = await generateText({
+          const { object } = await generateObject({
             model,
+            schema: schemaMap[kind] as never,
             system:
               NOVA_SYSTEM_PROMPT +
-              "\n\nReturn ONLY the structured data requested. Be specific, accurate, and helpful for Indian competitive exam students.",
+              "\n\nReturn ONLY valid structured JSON matching the schema. Be accurate and specific for Indian competitive exam students.",
             prompt,
-            experimental_output: Output.object({ schema: schemaMap[kind] as never }),
           });
-          return Response.json(experimental_output);
+          return Response.json(object);
         } catch (e) {
-          console.error("generate error", e);
+          const msg = e instanceof Error ? e.message : String(e);
+          console.error("generate error", msg);
           return new Response(
-            JSON.stringify({ error: "AI generation failed. Try again." }),
+            JSON.stringify({ error: "AI generation failed. Try again.", detail: msg }),
             { status: 500, headers: { "Content-Type": "application/json" } }
           );
         }
