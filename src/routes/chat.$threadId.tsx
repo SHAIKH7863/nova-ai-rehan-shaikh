@@ -219,6 +219,14 @@ function ChatPage() {
         </div>
       </div>
 
+      <ToolChips
+        disabled={isLoading}
+        onPick={(prefix) => {
+          setInput((cur) => (cur.trim() ? `${prefix}: ${cur.trim()}` : `${prefix}: `));
+          inputRef.current?.focus();
+        }}
+      />
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
