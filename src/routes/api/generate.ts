@@ -126,12 +126,12 @@ export const Route = createFileRoute("/api/generate")({
         try {
           const { object } = await generateObject({
             model,
-            schema: schemaMap[kind] as never,
+            schema: schemaMap[kind],
             system:
               NOVA_SYSTEM_PROMPT +
               "\n\nReturn ONLY valid structured JSON matching the schema. Be accurate and specific for Indian competitive exam students.",
             prompt,
-          });
+          } as Parameters<typeof generateObject>[0]);
           return Response.json(object);
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
