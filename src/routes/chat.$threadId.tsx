@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Send, Sparkles, Star, Loader2, Mic } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Star, Loader2, Mic, Link2, BookOpen, FileText, Brain, Calculator, Map, ListChecks, Lightbulb } from "lucide-react";
 import { Markdown } from "@/components/markdown";
 import { useThreads, type ChatThread } from "@/hooks/use-threads";
 import { toast } from "sonner";
@@ -219,6 +219,14 @@ function ChatPage() {
         </div>
       </div>
 
+      <ToolChips
+        disabled={isLoading}
+        onPick={(prefix) => {
+          setInput((cur) => (cur.trim() ? `${prefix}: ${cur.trim()}` : `${prefix}: `));
+          inputRef.current?.focus();
+        }}
+      />
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -289,6 +297,47 @@ function MessageBubble({ message }: { message: UIMessage }) {
         ) : (
           <Markdown>{text}</Markdown>
         )}
+      </div>
+    </div>
+  );
+}
+
+const TOOLS: { label: string; prefix: string; icon: React.ComponentType<{ size?: number }> }[] = [
+  { label: "Resources", prefix: "Find best resources (PDFs, YouTube, official links, books) for", icon: Link2 },
+  { label: "Notes", prefix: "Detailed study notes with key points and examples for", icon: BookOpen },
+  { label: "Summary", prefix: "Short crisp summary with bullet points for", icon: FileText },
+  { label: "Flashcards", prefix: "Create 10 Q&A style flashcards for", icon: Brain },
+  { label: "Formulas", prefix: "List all important formulas with brief explanation for", icon: Calculator },
+  { label: "Mock Qs", prefix: "Generate 10 MCQs with answers and explanations on", icon: ListChecks },
+  { label: "Roadmap", prefix: "Make a week-by-week study roadmap for", icon: Map },
+  { label: "Doubt", prefix: "Solve this doubt step-by-step in simple language", icon: Lightbulb },
+];
+
+function ToolChips({
+  onPick,
+  disabled,
+}: {
+  onPick: (prefix: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-2 w-max">
+        {TOOLS.map((t) => {
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.label}
+              type="button"
+              disabled={disabled}
+              onClick={() => onPick(t.prefix)}
+              className="glass flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-[11px] font-medium hover:bg-white/10 disabled:opacity-40"
+            >
+              <Icon size={12} />
+              {t.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
