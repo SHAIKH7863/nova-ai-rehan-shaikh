@@ -119,15 +119,22 @@ export const Route = createFileRoute("/api/generate")({
         const model = gateway("google/gemini-3-flash-preview");
 
         try {
-          const { object } = await generateObject({
+          const schema = schemaMap[kind];
+          const jsonShape = JSON.stringify(zodToShape(schema));
+          const { text } = await generateText({
             model,
-            schema: schemaMap[kind],
             system:
               NOVA_SYSTEM_PROMPT +
-              "\n\nReturn ONLY valid structured JSON matching the schema. Be accurate and specific for Indian competitive exam students.",
+              `\n\nYou MUST respond with ONLY a valid JSON object (no markdown fences, no commentary) matching this shape:\n${jsonShape}\nBe accurate, specific and useful for Indian competitive exam students.`,
             prompt,
-          } as Parameters<typeof generateObject>[0]);
-          return Response.json(object);
+          });
+          const parsed = extractJson(text);
+          const validated = schema.safeParse(parsed);
+          if (!validated.success) {
+            // Return raw if not strictly valid — UI can still render best effort
+            return Response.json(parsed ?? {});
+          }
+          return Response.json(validated.data);
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
           console.error("generate error", msg);
@@ -140,3 +147,38 @@ export const Route = createFileRoute("/api/generate")({
     },
   },
 });
+
+function extractJson(text: string): unknown {
+  const cleaned = text.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if (m) {
+      try {
+        return JSON.parse(m[0]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
+// Very small zod -> shape hint for the model prompt
+function zodToShape(s: z.ZodTypeAny): unknown {
+  const def: any = (s as any)._def;
+  const t = def?.typeName ?? def?.type;
+  if (t === "ZodObject" || t === "object") {
+    const shape = typeof def.shape === "function" ? def.shape() : def.shape;
+    const out: Record<string, unknown> = {};
+    for (const k of Object.keys(shape)) out[k] = zodToShape(shape[k]);
+    return out;
+  }
+  if (t === "ZodArray" || t === "array") return [zodToShape(def.type ?? def.element)];
+  if (t === "ZodOptional" || t === "optional") return zodToShape(def.innerType);
+  if (t === "ZodEnum" || t === "enum") return (def.values ?? def.entries ?? []).join("|");
+  if (t === "ZodNumber" || t === "number") return 0;
+  if (t === "ZodBoolean" || t === "boolean") return false;
+  return "string";
+}
