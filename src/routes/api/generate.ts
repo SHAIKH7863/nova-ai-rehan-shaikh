@@ -1,6 +1,6 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
 
