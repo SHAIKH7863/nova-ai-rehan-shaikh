@@ -28,8 +28,7 @@ const ResourceSchema = z.object({
         description: z.string(),
       })
     )
-    .min(4)
-    .max(12),
+    .min(1),
 });
 
 const QuestionSchema = z.object({
@@ -45,8 +44,7 @@ const QuestionSchema = z.object({
         marks: z.number().optional(),
       })
     )
-    .min(5)
-    .max(30),
+    .min(1),
 });
 
 const FlashcardSchema = z.object({
@@ -65,13 +63,12 @@ const FormulaSchema = z.object({
         description: z.string(),
       })
     )
-    .min(5)
-    .max(25),
+    .min(1),
 });
 
 const SummarySchema = z.object({
   title: z.string(),
-  keyPoints: z.array(z.string()).min(5).max(15),
+  keyPoints: z.array(z.string()).min(1),
   detailedNotes: z.string(),
   importantFormulas: z.array(z.string()).optional(),
 });
@@ -89,8 +86,7 @@ const RoadmapSchema = z.object({
         dailyHours: z.number(),
       })
     )
-    .min(3)
-    .max(8),
+    .min(1),
   tips: z.array(z.string()),
 });
 
