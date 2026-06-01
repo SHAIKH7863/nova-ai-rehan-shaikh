@@ -1,7 +1,7 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createLovableAiGatewayProvider, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
+import { getNovaModel, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -12,15 +12,13 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("messages required", { status: 400 });
         }
 
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) {
-          return new Response("AI not configured. Enable Lovable Cloud / AI Gateway.", {
+        const picked = getNovaModel();
+        if (!picked) {
+          return new Response("AI not configured. Add GOOGLE_API_KEY or enable Lovable AI.", {
             status: 500,
           });
         }
-
-        const gateway = createLovableAiGatewayProvider(key);
-        const model = gateway("google/gemini-3-flash-preview");
+        const { model } = picked;
 
         try {
           const result = streamText({

@@ -2,7 +2,7 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { generateText } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
+import { getNovaModel, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
 
 const ResourceSchema = z.object({
   resources: z
@@ -112,11 +112,9 @@ export const Route = createFileRoute("/api/generate")({
         if (!kind || !schemaMap[kind] || !prompt) {
           return new Response("kind + prompt required", { status: 400 });
         }
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("AI not configured", { status: 500 });
-
-        const gateway = createLovableAiGatewayProvider(key);
-        const model = gateway("google/gemini-3-flash-preview");
+        const picked = getNovaModel();
+        if (!picked) return new Response("AI not configured", { status: 500 });
+        const { model } = picked;
 
         try {
           const schema = schemaMap[kind];
