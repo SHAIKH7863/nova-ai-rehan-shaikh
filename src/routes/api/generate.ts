@@ -2,7 +2,7 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { generateText } from "ai";
 import { z } from "zod";
-import { getNovaModel, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
+import { getAiErrorMessage, getNovaModels, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
 
 const ResourceSchema = z.object({
   resources: z
@@ -112,15 +112,16 @@ export const Route = createFileRoute("/api/generate")({
         if (!kind || !schemaMap[kind] || !prompt) {
           return new Response("kind + prompt required", { status: 400 });
         }
-        const picked = getNovaModel();
-        if (!picked) return new Response("AI not configured", { status: 500 });
-        const { model } = picked;
+        const models = getNovaModels();
+        if (models.length === 0) return new Response("AI not configured", { status: 500 });
+        const schema = schemaMap[kind];
+        const jsonShape = JSON.stringify(zodToShape(schema));
+        const errors: string[] = [];
 
-        try {
-          const schema = schemaMap[kind];
-          const jsonShape = JSON.stringify(zodToShape(schema));
+        for (const picked of models) {
+          try {
           const { text } = await generateText({
-            model,
+            model: picked.model,
             system:
               NOVA_SYSTEM_PROMPT +
               `\n\nYou MUST respond with ONLY a valid JSON object (no markdown fences, no commentary) matching this shape:\n${jsonShape}\nBe accurate, specific and useful for Indian competitive exam students.`,
@@ -133,9 +134,15 @@ export const Route = createFileRoute("/api/generate")({
             return Response.json(parsed ?? {});
           }
           return Response.json(validated.data);
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : String(e);
-          console.error("generate error", msg);
+          } catch (e) {
+            const msg = getAiErrorMessage(e);
+            errors.push(`${picked.provider}: ${msg}`);
+            console.error("generate error", msg);
+          }
+        }
+
+        {
+          const msg = errors.at(-1) ?? "AI generation failed. Try again.";
           return new Response(
             JSON.stringify({ error: "AI generation failed. Try again.", detail: msg }),
             { status: 500, headers: { "Content-Type": "application/json" } }

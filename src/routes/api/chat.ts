@@ -1,7 +1,7 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { getNovaModel, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
+import { getAiErrorMessage, getNovaModels, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("messages required", { status: 400 });
         }
 
-        const picked = getNovaModel();
+        const picked = getNovaModels()[0];
         if (!picked) {
           return new Response("AI not configured. Add GOOGLE_API_KEY or enable Lovable AI.", {
             status: 500,
@@ -26,10 +26,14 @@ export const Route = createFileRoute("/api/chat")({
             system: NOVA_SYSTEM_PROMPT,
             messages: await convertToModelMessages(body.messages),
           });
-          return result.toUIMessageStreamResponse({ originalMessages: body.messages });
+          return result.toUIMessageStreamResponse({
+            originalMessages: body.messages,
+            onError: getAiErrorMessage,
+          });
         } catch (e) {
-          console.error("chat error", e);
-          return new Response("AI request failed", { status: 500 });
+          const message = getAiErrorMessage(e);
+          console.error("chat error", message);
+          return new Response(message, { status: 500 });
         }
       },
     },
