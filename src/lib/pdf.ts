@@ -1,13 +1,13 @@
-import jsPDF from "jspdf";
+export async function downloadTextAsPdf(title: string, body: string) {
+  if (typeof window === "undefined") return;
+  const { default: jsPDF } = await import("jspdf");
 
-export function downloadTextAsPdf(title: string, body: string) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
   const maxW = pageW - margin * 2;
 
-  // Title
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   const titleLines = doc.splitTextToSize(title || "Nova AI Notes", maxW);
@@ -15,7 +15,6 @@ export function downloadTextAsPdf(title: string, body: string) {
 
   let y = margin + 10 + titleLines.length * 20 + 10;
 
-  // Subtitle
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(120);
@@ -26,7 +25,6 @@ export function downloadTextAsPdf(title: string, body: string) {
   );
   y += 18;
 
-  // Body — strip basic markdown for cleaner PDF
   const clean = body
     .replace(/```[\s\S]*?```/g, (m) => m.replace(/```/g, ""))
     .replace(/[*_`#>]/g, "")
