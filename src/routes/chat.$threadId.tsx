@@ -284,8 +284,55 @@ function msgText(m: UIMessage): string {
 function MessageBubble({ message }: { message: UIMessage }) {
   const isUser = message.role === "user";
   const text = msgText(message);
+  const [speaking, setSpeaking] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied");
+    } catch {
+      toast.error("Copy failed");
+    }
+  };
+
+  const pdf = () => {
+    const title = text.split("\n")[0].slice(0, 80) || "Nova AI Notes";
+    downloadTextAsPdf(title, text);
+    toast.success("PDF downloaded");
+  };
+
+  const share = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Nova AI", text });
+      } catch {
+        /* user cancelled */
+      }
+    } else {
+      copy();
+    }
+  };
+
+  const speak = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.error("Speech not supported");
+      return;
+    }
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "hi-IN";
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(u);
+    setSpeaking(true);
+  };
+
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
       <div
         className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm ${
           isUser
@@ -299,7 +346,37 @@ function MessageBubble({ message }: { message: UIMessage }) {
           <Markdown>{text}</Markdown>
         )}
       </div>
+      {!isUser && text.length > 0 && (
+        <div className="flex items-center gap-1 px-1">
+          <ActionBtn onClick={copy} label="Copy"><Copy size={12} /></ActionBtn>
+          <ActionBtn onClick={pdf} label="PDF"><Download size={12} /> PDF</ActionBtn>
+          <ActionBtn onClick={speak} label="Listen">
+            {speaking ? <VolumeX size={12} /> : <Volume2 size={12} />}
+          </ActionBtn>
+          <ActionBtn onClick={share} label="Share"><Share2 size={12} /></ActionBtn>
+        </div>
+      )}
     </div>
+  );
+}
+
+function ActionBtn({
+  onClick,
+  label,
+  children,
+}: {
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[10px] text-muted-foreground hover:bg-white/10 hover:text-foreground"
+    >
+      {children}
+    </button>
   );
 }
 
