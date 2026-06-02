@@ -6,7 +6,7 @@ import {
   Layers,
   FileText,
   Calculator,
-  Map,
+  Map as MapIcon,
   ChevronLeft,
   Bookmark,
 } from "lucide-react";
