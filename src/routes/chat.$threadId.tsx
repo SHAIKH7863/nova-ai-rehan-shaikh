@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Send, Sparkles, Star, Loader2, Mic, Link2, BookOpen, FileText, Brain, Calculator, Map, ListChecks, Lightbulb, Download, Copy, Share2, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Star, Loader2, Mic, Link2, BookOpen, FileText, Brain, Calculator, Map as MapIcon, ListChecks, Lightbulb, Download, Copy, Share2, Volume2, VolumeX } from "lucide-react";
 import { Markdown } from "@/components/markdown";
 import { useThreads, type ChatThread } from "@/hooks/use-threads";
 import { toast } from "sonner";
