@@ -6,7 +6,7 @@ import {
   Layers,
   FileText,
   Calculator,
-  Map,
+  Map as MapIcon,
   ChevronLeft,
   Bookmark,
 } from "lucide-react";
@@ -63,7 +63,7 @@ const TOOLS: {
     key: "roadmap",
     label: "Exam Roadmap",
     desc: "Personalized prep plan",
-    icon: Map,
+    icon: MapIcon,
     placeholder: "Exam + months e.g. NEET in 6 months",
   },
 ];
