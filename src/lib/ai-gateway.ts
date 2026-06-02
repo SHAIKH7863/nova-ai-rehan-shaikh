@@ -27,7 +27,7 @@ export function getNovaModels() {
 export function getAiErrorMessage(error: unknown) {
   const msg = error instanceof Error ? error.message : String(error);
   if (/quota|rate-limit|rate limit|429|exceeded/i.test(msg)) {
-    return "Google AI Studio free quota khatam ho gaya hai. Nova ab backup AI se try karega; agar error rahe to thodi der baad retry karein ya Google billing/quota update karein.";
+    return "Google AI Studio free quota khatam ho gaya hai. App ab pehle Lovable AI Gateway use karta hai; agar error rahe to thodi der baad retry karein ya Google billing/quota update karein.";
   }
   return msg || "AI request failed. Please try again.";
 }
