@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ExternalLink, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ExternalLink, X, Loader2, AlertTriangle } from "lucide-react";
 
 export function InAppBrowser({
   url,
@@ -10,7 +10,20 @@ export function InAppBrowser({
   title?: string;
   onClose: () => void;
 }) {
-  const [errored, setErrored] = useState(false);
+  const [status, setStatus] = useState<"loading" | "ok" | "blocked">("loading");
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Many sites (YouTube watch pages, Google, most .gov.in, NTA, etc.) send
+  // X-Frame-Options: DENY / CSP frame-ancestors and silently fail to load
+  // in an iframe. We can't reliably detect that from JS, so after a short
+  // timeout if `load` never fired we mark as blocked and prompt the user to
+  // open the link in a new tab.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setStatus((s) => (s === "loading" ? "blocked" : s));
+    }, 3500);
+    return () => clearTimeout(t);
+  }, [url]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
@@ -30,29 +43,61 @@ export function InAppBrowser({
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary"
+          className="flex h-9 items-center gap-1 rounded-xl gradient-primary px-3 text-xs font-semibold"
           aria-label="Open externally"
         >
-          <ExternalLink size={16} />
+          <ExternalLink size={14} /> Open
         </a>
       </div>
+
       <div className="relative flex-1 bg-white">
-        {!errored ? (
+        {status !== "blocked" && (
           <iframe
+            ref={iframeRef}
             src={url}
             title={title ?? url}
             className="h-full w-full border-0"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-            onError={() => setErrored(true)}
+            onLoad={() => setStatus("ok")}
           />
-        ) : null}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/80 to-transparent p-4 text-center text-xs text-foreground">
-          <p className="pointer-events-auto inline-block rounded-full glass px-3 py-1">
-            Some sites block embedding. Tap{" "}
-            <ExternalLink size={12} className="inline -mt-0.5" /> to open in new
-            tab.
-          </p>
-        </div>
+        )}
+
+        {status === "loading" && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/80">
+            <div className="flex items-center gap-2 rounded-full bg-background px-3 py-1.5 text-xs text-foreground">
+              <Loader2 size={14} className="animate-spin" /> Loading…
+            </div>
+          </div>
+        )}
+
+        {status === "blocked" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background p-6 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400">
+              <AlertTriangle size={22} />
+            </div>
+            <p className="text-sm font-semibold">
+              Ye site iframe me open nahi hoti
+            </p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              Security ke kaaran (YouTube, Google, govt sites, etc.) inhe app ke
+              andar embed nahi kar sakte. Naye tab me kholo —
+            </p>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 flex items-center gap-2 rounded-xl gradient-primary px-4 py-2.5 text-sm font-semibold"
+            >
+              <ExternalLink size={14} /> Open in new tab
+            </a>
+            <button
+              onClick={onClose}
+              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
