@@ -16,12 +16,22 @@ export const Route = createFileRoute("/chat/$threadId")({
 });
 
 const SUGGESTIONS = [
-  "Explain Newton's laws with examples",
-  "Polity ke fundamental rights short me batao",
-  "JEE Main 2024 syllabus dedo",
-  "Photosynthesis ka diagram and notes",
-  "Roadmap for NEET in 6 months",
+  { icon: "⚡", text: "Newton's laws ko real-life example se samjhao" },
+  { icon: "📜", text: "Fundamental Rights short notes + trick to remember" },
+  { icon: "🎯", text: "JEE Main 2025 ke best free resources aur PDFs do" },
+  { icon: "🌱", text: "Photosynthesis full notes with diagram explanation" },
+  { icon: "🗺️", text: "6 months me NEET crack karne ka week-wise roadmap" },
+  { icon: "🔥", text: "Aaj ka motivation chahiye — exam stress ho raha hai" },
 ];
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return "Late night grind? 🌙";
+  if (h < 12) return "Good morning, champ! ☀️";
+  if (h < 17) return "Afternoon focus mode 🎯";
+  if (h < 21) return "Evening study session? 🌆";
+  return "Night owl mode 🦉";
+}
 
 function ChatPage() {
   const { threadId } = Route.useParams();
