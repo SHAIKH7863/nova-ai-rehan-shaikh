@@ -20,9 +20,7 @@ export function getNovaModels(opts?: { search?: boolean }) {
   if (googleKey) {
     const google = createGoogleGenerativeAI({ apiKey: googleKey });
     // Enable Google Search grounding so the model returns real, current URLs.
-    const model = opts?.search
-      ? google("gemini-2.5-flash", { useSearchGrounding: true } as any)
-      : google("gemini-2.5-flash");
+    const model = google("gemini-2.5-flash");
     models.push({ model, provider: "google" });
   }
   return models;
