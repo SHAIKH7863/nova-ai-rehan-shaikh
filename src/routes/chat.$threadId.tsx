@@ -16,12 +16,22 @@ export const Route = createFileRoute("/chat/$threadId")({
 });
 
 const SUGGESTIONS = [
-  "Explain Newton's laws with examples",
-  "Polity ke fundamental rights short me batao",
-  "JEE Main 2024 syllabus dedo",
-  "Photosynthesis ka diagram and notes",
-  "Roadmap for NEET in 6 months",
+  { icon: "⚡", text: "Newton's laws ko real-life example se samjhao" },
+  { icon: "📜", text: "Fundamental Rights short notes + trick to remember" },
+  { icon: "🎯", text: "JEE Main 2025 ke best free resources aur PDFs do" },
+  { icon: "🌱", text: "Photosynthesis full notes with diagram explanation" },
+  { icon: "🗺️", text: "6 months me NEET crack karne ka week-wise roadmap" },
+  { icon: "🔥", text: "Aaj ka motivation chahiye — exam stress ho raha hai" },
 ];
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return "Late night grind? 🌙";
+  if (h < 12) return "Good morning, champ! ☀️";
+  if (h < 17) return "Afternoon focus mode 🎯";
+  if (h < 21) return "Evening study session? 🌆";
+  return "Night owl mode 🦉";
+}
 
 function ChatPage() {
   const { threadId } = Route.useParams();
@@ -174,28 +184,34 @@ function ChatPage() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto pb-4">
         {messages.length === 0 && (
           <div className="mt-4 space-y-3">
-            <div className="glass rounded-3xl p-5 text-center">
-              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl gradient-primary animate-pulse-glow">
-                <Sparkles size={20} />
+            <div className="glass rounded-3xl p-5 text-center relative overflow-hidden">
+              <div className="absolute inset-0 -z-10 opacity-40 blur-2xl gradient-aurora" />
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary animate-pulse-glow">
+                <Sparkles size={22} />
               </div>
-              <p className="font-display text-base font-semibold text-gradient">
-                Namaste! I'm Nova AI 💜
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                {greeting()}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Kuch bhi pucho — Hindi, English, Hinglish, Marathi, Tamil, Bengali, koi bhi bhasha. Padhai ke liye main hu yahan.
+              <p className="font-display text-lg font-semibold text-gradient mt-1">
+                Main Nova hu 💜
+              </p>
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                Tumhara personal study buddy. Koi bhi sawaal, koi bhi bhasha — bas pucho. Concepts, notes, PDFs, roadmap, motivation — sab milega yahi. ✨
               </p>
             </div>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-1">
-              Try asking
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-1 pt-1">
+              ✦ Try asking
             </p>
             <div className="flex flex-col gap-2">
               {SUGGESTIONS.map((s) => (
                 <button
-                  key={s}
-                  onClick={() => send(s)}
-                  className="glass rounded-xl px-3 py-2.5 text-left text-xs hover:bg-white/5"
+                  key={s.text}
+                  onClick={() => send(s.text)}
+                  className="glass group flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs hover:bg-white/10 hover:border-primary/30 transition-all"
                 >
-                  {s}
+                  <span className="text-base">{s.icon}</span>
+                  <span className="flex-1">{s.text}</span>
+                  <span className="opacity-0 group-hover:opacity-100 text-primary transition-opacity">→</span>
                 </button>
               ))}
             </div>
