@@ -9,17 +9,21 @@ export const createLovableAiGatewayProvider = (lovableApiKey: string) =>
     headers: { "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
   });
 
-export function getNovaModels() {
-  const models = [];
+export function getNovaModels(opts?: { search?: boolean }) {
+  const models: { model: any; provider: "lovable" | "google"; tools?: any }[] = [];
   const lovableKey = process.env.LOVABLE_API_KEY;
   if (lovableKey) {
     const gateway = createLovableAiGatewayProvider(lovableKey);
-    models.push({ model: gateway("google/gemini-3-flash-preview"), provider: "lovable" as const });
+    models.push({ model: gateway("google/gemini-3-flash-preview"), provider: "lovable" });
   }
   const googleKey = process.env.GOOGLE_API_KEY;
   if (googleKey) {
     const google = createGoogleGenerativeAI({ apiKey: googleKey });
-    models.push({ model: google("gemini-2.5-flash"), provider: "google" as const });
+    // Enable Google Search grounding so the model returns real, current URLs.
+    const model = opts?.search
+      ? google("gemini-2.5-flash", { useSearchGrounding: true } as any)
+      : google("gemini-2.5-flash");
+    models.push({ model, provider: "google" });
   }
   return models;
 }
