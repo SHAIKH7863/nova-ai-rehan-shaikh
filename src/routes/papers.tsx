@@ -41,7 +41,11 @@ function PapersPage() {
   const [loading, setLoading] = useState(false);
   const [paper, setPaper] = useState<Paper | null>(null);
   const [showAnswers, setShowAnswers] = useState(false);
+  const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   const { add } = useBookmarks();
+
+  const toggleOne = (i: number) =>
+    setRevealed((r) => ({ ...r, [i]: !r[i] }));
 
   const generate = async () => {
     if (!topic.trim()) {
@@ -285,38 +289,47 @@ function PapersPage() {
           </div>
 
           <ol className="space-y-2">
-            {paper.questions.map((q, i) => (
-              <li key={i} className="glass rounded-2xl p-3 text-sm">
-                <p className="font-medium">
-                  <span className="text-primary mr-1">Q{i + 1}.</span>
-                  {q.question}
-                </p>
-                {q.options && (
-                  <ul className="mt-2 space-y-1 text-xs">
-                    {q.options.map((o, j) => (
-                      <li key={j} className="rounded-lg bg-white/5 px-2.5 py-1.5">
-                        <span className="font-semibold text-muted-foreground mr-2">
-                          {String.fromCharCode(65 + j)}.
-                        </span>
-                        {o}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {showAnswers && (
-                  <div className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2 text-xs">
-                    <p className="font-semibold text-emerald-300">
-                      Ans: {q.answer}
-                    </p>
-                    {q.explanation && (
-                      <p className="mt-1 text-muted-foreground">
-                        {q.explanation}
+            {paper.questions.map((q, i) => {
+              const open = showAnswers || revealed[i];
+              return (
+                <li key={i} className="glass rounded-2xl p-3 text-sm">
+                  <p className="font-medium">
+                    <span className="text-primary mr-1">Q{i + 1}.</span>
+                    {q.question}
+                  </p>
+                  {q.options && (
+                    <ul className="mt-2 space-y-1 text-xs">
+                      {q.options.map((o, j) => (
+                        <li key={j} className="rounded-lg bg-white/5 px-2.5 py-1.5">
+                          <span className="font-semibold text-muted-foreground mr-2">
+                            {String.fromCharCode(65 + j)}.
+                          </span>
+                          {o}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <button
+                    onClick={() => toggleOne(i)}
+                    className="mt-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-foreground hover:bg-white/15"
+                  >
+                    {open ? "Hide answer" : "Show answer"}
+                  </button>
+                  {open && (
+                    <div className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2 text-xs">
+                      <p className="font-semibold text-emerald-300">
+                        Ans: {q.answer}
                       </p>
-                    )}
-                  </div>
-                )}
-              </li>
-            ))}
+                      {q.explanation && (
+                        <p className="mt-1 text-muted-foreground">
+                          {q.explanation}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ol>
         </div>
       )}
