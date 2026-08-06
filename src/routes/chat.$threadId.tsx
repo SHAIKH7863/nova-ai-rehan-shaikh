@@ -297,6 +297,18 @@ function msgText(m: UIMessage): string {
     .trim();
 }
 
+/** Strip markdown/URLs so the voice reads only the actual content. */
+function speakableText(t: string): string {
+  return cleanAiText(t)
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, "$1")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[#*_>`|]/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+
 function MessageBubble({ message }: { message: UIMessage }) {
   const isUser = message.role === "user";
   const text = cleanAiText(msgText(message));
