@@ -299,8 +299,9 @@ function msgText(m: UIMessage): string {
 
 function MessageBubble({ message }: { message: UIMessage }) {
   const isUser = message.role === "user";
-  const text = msgText(message);
+  const text = cleanAiText(msgText(message));
   const [speaking, setSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const copy = async () => {
     try {
@@ -329,23 +330,52 @@ function MessageBubble({ message }: { message: UIMessage }) {
     }
   };
 
-  const speak = () => {
+  const stopSpeak = () => {
+    audioRef.current?.pause();
+    audioRef.current = null;
+    if (typeof window !== "undefined" && "speechSynthesis" in window)
+      window.speechSynthesis.cancel();
+    setSpeaking(false);
+  };
+
+  const browserSpeak = () => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       toast.error("Speech not supported");
       return;
     }
-    if (speaking) {
-      window.speechSynthesis.cancel();
-      setSpeaking(false);
-      return;
-    }
-    const u = new SpeechSynthesisUtterance(text);
+    const u = new SpeechSynthesisUtterance(speakableText(text));
     u.lang = "hi-IN";
     u.onend = () => setSpeaking(false);
     u.onerror = () => setSpeaking(false);
     window.speechSynthesis.speak(u);
     setSpeaking(true);
   };
+
+  const speak = async () => {
+    if (speaking) {
+      stopSpeak();
+      return;
+    }
+    setSpeaking(true);
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: speakableText(text) }),
+      });
+      if (!res.ok) throw new Error(await res.text().catch(() => "tts failed"));
+      const blob = await res.blob();
+      const audio = new Audio(URL.createObjectURL(blob));
+      audioRef.current = audio;
+      audio.onended = () => setSpeaking(false);
+      audio.onerror = () => setSpeaking(false);
+      await audio.play();
+    } catch {
+      // Gemini voice unavailable — fall back to device voice
+      browserSpeak();
+    }
+  };
+
 
   return (
     <div className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
