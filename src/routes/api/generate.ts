@@ -129,11 +129,13 @@ export const Route = createFileRoute("/api/generate")({
           });
           const parsed = extractJson(text);
           const validated = schema.safeParse(parsed);
-          if (!validated.success) {
-            // Return raw if not strictly valid — UI can still render best effort
-            return Response.json(parsed ?? {});
+          if (validated.success) return Response.json(validated.data);
+          if (parsed && typeof parsed === "object" && Object.keys(parsed).length > 0) {
+            // best-effort: usable even if not strictly valid
+            return Response.json(parsed);
           }
-          return Response.json(validated.data);
+          errors.push(`${picked.provider}: empty/invalid JSON`);
+
           } catch (e) {
             const msg = getAiErrorMessage(e);
             errors.push(`${picked.provider}: ${msg}`);

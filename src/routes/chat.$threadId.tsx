@@ -7,6 +7,8 @@ import { Markdown, cleanAiText } from "@/components/markdown";
 import { useThreads, type ChatThread } from "@/hooks/use-threads";
 import { toast } from "sonner";
 import { downloadTextAsPdf } from "@/lib/pdf";
+const NOVA_SECRET_CODE = "nova-boss-786";
+
 
 export const Route = createFileRoute("/chat/$threadId")({
   head: () => ({
@@ -49,10 +51,16 @@ function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const [boss, setBoss] = useState(false);
+  useEffect(() => {
+    setBoss(localStorage.getItem("nova-boss") === "1");
+  }, []);
+
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
-    []
+    () => new DefaultChatTransport({ api: "/api/chat", body: { boss } }),
+    [boss]
   );
+
 
   const { messages, sendMessage, status, error } = useChat({
     id: threadId,
@@ -108,9 +116,19 @@ function ChatPage() {
   const send = (text: string) => {
     const t = text.trim();
     if (!t || isLoading) return;
+    if (t.toLowerCase() === NOVA_SECRET_CODE) {
+      localStorage.setItem("nova-boss", "1");
+      setBoss(true);
+      setInput("");
+      toast.success("👑 Boss Mode unlocked!", {
+        description: "Nova ab full power me hai — kuch bhi maango, sab milega.",
+      });
+      return;
+    }
     sendMessage({ text: t });
     setInput("");
   };
+
 
   // Voice input (Web Speech API)
   const [listening, setListening] = useState(false);

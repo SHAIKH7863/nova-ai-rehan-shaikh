@@ -1,16 +1,22 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { getAiErrorMessage, getNovaModels, NOVA_SYSTEM_PROMPT } from "@/lib/ai-gateway";
+import {
+  getAiErrorMessage,
+  getNovaModels,
+  NOVA_BOSS_PROMPT,
+  NOVA_SYSTEM_PROMPT,
+} from "@/lib/ai-gateway";
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
-        const body = (await request.json()) as { messages?: UIMessage[] };
+        const body = (await request.json()) as { messages?: UIMessage[]; boss?: boolean };
         if (!Array.isArray(body.messages)) {
           return new Response("messages required", { status: 400 });
         }
+
 
         const picked = getNovaModels()[0];
         if (!picked) {
@@ -23,7 +29,7 @@ export const Route = createFileRoute("/api/chat")({
         try {
           const result = streamText({
             model,
-            system: NOVA_SYSTEM_PROMPT,
+            system: NOVA_SYSTEM_PROMPT + (body.boss ? NOVA_BOSS_PROMPT : ""),
             messages: await convertToModelMessages(body.messages),
           });
           return result.toUIMessageStreamResponse({
