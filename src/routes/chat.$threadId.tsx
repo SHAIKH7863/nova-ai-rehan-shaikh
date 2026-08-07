@@ -114,9 +114,19 @@ function ChatPage() {
   const send = (text: string) => {
     const t = text.trim();
     if (!t || isLoading) return;
+    if (t.toLowerCase() === NOVA_SECRET_CODE) {
+      localStorage.setItem("nova-boss", "1");
+      setBoss(true);
+      setInput("");
+      toast.success("👑 Boss Mode unlocked!", {
+        description: "Nova ab full power me hai — kuch bhi maango, sab milega.",
+      });
+      return;
+    }
     sendMessage({ text: t });
     setInput("");
   };
+
 
   // Voice input (Web Speech API)
   const [listening, setListening] = useState(false);
