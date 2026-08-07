@@ -49,10 +49,16 @@ function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const [boss, setBoss] = useState(false);
+  useEffect(() => {
+    setBoss(localStorage.getItem("nova-boss") === "1");
+  }, []);
+
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
-    []
+    () => new DefaultChatTransport({ api: "/api/chat", body: { boss } }),
+    [boss]
   );
+
 
   const { messages, sendMessage, status, error } = useChat({
     id: threadId,
