@@ -7,7 +7,7 @@ import { Markdown, cleanAiText } from "@/components/markdown";
 import { useThreads, type ChatThread } from "@/hooks/use-threads";
 import { toast } from "sonner";
 import { downloadTextAsPdf } from "@/lib/pdf";
-import { NOVA_SECRET_CODE } from "@/lib/ai-gateway";
+const NOVA_SECRET_CODE = "nova-boss-786";
 
 
 export const Route = createFileRoute("/chat/$threadId")({
