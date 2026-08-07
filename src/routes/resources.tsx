@@ -97,19 +97,34 @@ function ResourcesPage() {
     setQ(text);
     setLoading(true);
     setResults([]);
-    try {
-      const examCtx = profile.exam ? ` for ${profile.exam}` : "";
+    const examCtx = profile.exam ? ` for ${profile.exam}` : "";
+    const prompt = `Find the most relevant, real, well-known study resources${examCtx} for: "${text}". Include a mix of types: official sites (NTA, NCERT, exam boards), free PDFs, YouTube channel/playlist links (Physics Wallah, Khan Academy, Unacademy free, etc.), books, syllabus PDFs, admit card / result pages where applicable. Use real URLs you are confident about. Don't invent links. Always return at least 5 resources — never return an empty list, never refuse.`;
+
+    const attempt = async (): Promise<Resource[]> => {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          kind: "resources",
-          prompt: `Find the most relevant, real, well-known study resources${examCtx} for: "${text}". Include a mix of types: official sites (NTA, NCERT, exam boards), free PDFs, YouTube channel/playlist links (Physics Wallah, Khan Academy, Unacademy free, etc.), books, syllabus PDFs, admit card / result pages where applicable. Use real URLs you are confident about. Don't invent links.`,
-        }),
+        body: JSON.stringify({ kind: "resources", prompt }),
       });
-      if (!res.ok) throw new Error(await res.text());
-      const data = (await res.json()) as { resources: Resource[] };
-      setResults(data.resources ?? []);
+      const raw = await res.text();
+      if (!res.ok) throw new Error(raw.slice(0, 200) || `HTTP ${res.status}`);
+      let data: any;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error("AI response samajh nahi aaya, dobara try karo");
+      }
+      const list: Resource[] = Array.isArray(data)
+        ? data
+        : (data?.resources ?? data?.results ?? data?.links ?? []);
+      return (list ?? []).filter((r) => r && r.url && r.title);
+    };
+
+    try {
+      let list = await attempt();
+      if (list.length === 0) list = await attempt(); // one retry
+      if (list.length === 0) throw new Error("Koi result nahi mila — thoda alag shabd try karo");
+      setResults(list);
     } catch (e) {
       console.error(e);
       toast.error("Search failed", {
@@ -119,6 +134,7 @@ function ResourcesPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div>
