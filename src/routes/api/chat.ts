@@ -29,7 +29,7 @@ export const Route = createFileRoute("/api/chat")({
         try {
           const result = streamText({
             model,
-            system: NOVA_SYSTEM_PROMPT,
+            system: NOVA_SYSTEM_PROMPT + (body.boss ? NOVA_BOSS_PROMPT : ""),
             messages: await convertToModelMessages(body.messages),
           });
           return result.toUIMessageStreamResponse({
