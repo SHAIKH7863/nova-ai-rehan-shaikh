@@ -19,12 +19,22 @@ export const Route = createFileRoute("/chat/$threadId")({
 
 const SUGGESTIONS = [
   { icon: "⚡", text: "Newton's laws ko real-life example se samjhao" },
-  { icon: "📜", text: "Fundamental Rights short notes + trick to remember" },
+  { icon: "🌹", text: "Chai aur baarish par ek shayari sunao" },
   { icon: "🎯", text: "JEE Main 2025 ke best free resources aur PDFs do" },
-  { icon: "🌱", text: "Photosynthesis full notes with diagram explanation" },
+  { icon: "💔", text: "Judaai par Faraz ke andaz me 2 sher likho" },
   { icon: "🗺️", text: "6 months me NEET crack karne ka week-wise roadmap" },
   { icon: "🔥", text: "Aaj ka motivation chahiye — exam stress ho raha hai" },
 ];
+
+const BOSS_SUGGESTIONS = [
+  { icon: "🌹", text: "Mere mood par ek gehri shayari likho" },
+  { icon: "👑", text: "Aaj ka full study plan bana do, Boss style" },
+  { icon: "💎", text: "Koi zabardast idea do jo main build kar saku" },
+  { icon: "📚", text: "Kisi bhi topic ke complete notes + PDF links do" },
+  { icon: "🕊️", text: "Dosti par Ghalib ke andaz me sher sunao" },
+  { icon: "🚀", text: "Meri productivity 10x kaise karu?" },
+];
+
 
 function greeting() {
   const h = new Date().getHours();
