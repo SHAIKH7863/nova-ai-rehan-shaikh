@@ -512,6 +512,7 @@ const TOOLS: { label: string; prefix: string; icon: React.ComponentType<{ size?:
   { label: "Formulas", prefix: "List all important formulas with brief explanation for", icon: Calculator },
   { label: "Mock Qs", prefix: "Generate 10 MCQs with answers and explanations on", icon: ListChecks },
   { label: "Roadmap", prefix: "Make a week-by-week study roadmap for", icon: MapIcon },
+  { label: "Shayari", prefix: "Khud se ek original shayari likho is topic par", icon: Feather },
   { label: "Doubt", prefix: "Solve this doubt step-by-step in simple language", icon: Lightbulb },
 ];
 
