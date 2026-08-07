@@ -62,8 +62,10 @@ function ChatPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const [boss, setBoss] = useState(false);
+  const [greet, setGreet] = useState("");
   useEffect(() => {
     setBoss(localStorage.getItem("nova-boss") === "1");
+    setGreet(greeting());
   }, []);
 
   const transport = useMemo(
