@@ -125,9 +125,37 @@ function ChatPage() {
 
   const isLoading = status === "submitted" || status === "streaming";
 
+  // ---- Image generation mode ----
+  type GenImage = { id: string; prompt: string; url?: string; error?: string };
+  const [imageMode, setImageMode] = useState(false);
+  const [images, setImages] = useState<GenImage[]>([]);
+  const [genLoading, setGenLoading] = useState(false);
+
+  const generateImage = async (prompt: string) => {
+    const id = crypto.randomUUID();
+    setImages((cur) => [...cur, { id, prompt }]);
+    setGenLoading(true);
+    try {
+      const res = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { image?: string; error?: string };
+      if (!res.ok || !data.image) throw new Error(data.error || "Image generation failed");
+      setImages((cur) => cur.map((i) => (i.id === id ? { ...i, url: data.image } : i)));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Image generation failed";
+      setImages((cur) => cur.map((i) => (i.id === id ? { ...i, error: msg } : i)));
+      toast.error("Image ban nahi paayi", { description: msg });
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
   const send = (text: string) => {
     const t = text.trim();
-    if (!t || isLoading) return;
+    if (!t || isLoading || genLoading) return;
     if (t.toLowerCase() === NOVA_SECRET_CODE) {
       localStorage.setItem("nova-boss", "1");
       setBoss(true);
@@ -137,9 +165,15 @@ function ChatPage() {
       });
       return;
     }
+    if (imageMode) {
+      setInput("");
+      void generateImage(t);
+      return;
+    }
     sendMessage({ text: t });
     setInput("");
   };
+
 
 
   // Voice input (Web Speech API)
