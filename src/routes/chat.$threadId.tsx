@@ -602,14 +602,32 @@ const TOOLS: { label: string; prefix: string; icon: React.ComponentType<{ size?:
 function ToolChips({
   onPick,
   disabled,
+  imageMode,
+  onToggleImage,
 }: {
   onPick: (prefix: string) => void;
   disabled?: boolean;
+  imageMode?: boolean;
+  onToggleImage?: () => void;
 }) {
   return (
     <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex gap-2 w-max">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={onToggleImage}
+          className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium disabled:opacity-40 ${
+            imageMode
+              ? "gradient-primary border-transparent text-primary-foreground"
+              : "glass border-white/10 hover:bg-white/10"
+          }`}
+        >
+          <ImageIcon size={12} />
+          Image
+        </button>
         {TOOLS.map((t) => {
+
           const Icon = t.icon;
           return (
             <button
