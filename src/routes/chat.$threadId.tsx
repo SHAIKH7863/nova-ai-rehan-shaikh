@@ -328,6 +328,41 @@ function ChatPage() {
               <span>Nova soch raha hai...</span>
             </div>
           )}
+          {images.map((img) => (
+            <div key={img.id} className="flex flex-col items-start gap-1">
+              <div className="max-w-[88%] rounded-2xl gradient-primary px-3.5 py-2.5 text-sm text-primary-foreground self-end">
+                🎨 {img.prompt}
+              </div>
+              <div className="glass w-[88%] overflow-hidden rounded-2xl p-2">
+                {img.url ? (
+                  <>
+                    <img
+                      src={img.url}
+                      alt={img.prompt}
+                      className="w-full rounded-xl"
+                      loading="lazy"
+                    />
+                    <a
+                      href={img.url}
+                      download={`nova-${img.id.slice(0, 6)}.png`}
+                      className="mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-[11px] font-medium hover:bg-white/20"
+                    >
+                      <Download size={12} /> Download image
+                    </a>
+                  </>
+                ) : img.error ? (
+                  <p className="p-2 text-xs text-destructive">{img.error}</p>
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-white/5">
+                    <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 size={18} className="animate-spin" />
+                      Image bana raha hu... 🎨
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
           {error && (
             <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
               {error.message}
@@ -336,9 +371,22 @@ function ChatPage() {
         </div>
       </div>
 
+      {imageMode && (
+        <div className="mb-2 flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-[11px]">
+          <ImageIcon size={13} className="text-primary" />
+          <span className="flex-1">Image mode on — jo likhoge uski picture banegi 🎨</span>
+          <button type="button" onClick={() => setImageMode(false)} aria-label="Exit image mode">
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
       <ToolChips
-        disabled={isLoading}
+        disabled={isLoading || genLoading}
+        imageMode={imageMode}
+        onToggleImage={() => setImageMode((v) => !v)}
         onPick={(prefix) => {
+          setImageMode(false);
           setInput((cur) => (cur.trim() ? `${prefix}: ${cur.trim()}` : `${prefix}: `));
           inputRef.current?.focus();
         }}
@@ -362,7 +410,7 @@ function ChatPage() {
                 send(input);
               }
             }}
-            placeholder="Pucho kuch bhi..."
+            placeholder={imageMode ? "Kaisi image chahiye? Describe karo..." : "Pucho kuch bhi..."}
             rows={1}
             className="max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground"
           />
@@ -378,7 +426,7 @@ function ChatPage() {
           </button>
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || genLoading}
             className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-[0_0_20px_-6px_var(--primary)] disabled:opacity-40"
             aria-label="Send"
           >
@@ -386,6 +434,7 @@ function ChatPage() {
           </button>
         </div>
       </form>
+
     </div>
   );
 }
