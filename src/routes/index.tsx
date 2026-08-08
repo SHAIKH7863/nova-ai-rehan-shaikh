@@ -20,7 +20,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "AI tutor, resources, question papers and study tools for Indian competitive exams. Built by REHAN SHAIKH.",
+          "AI tutor, resources, question papers and study tools for Indian competitive exams. 100% free.",
       },
       { property: "og:title", content: "Nova AI — Your Study Companion" },
       {
@@ -157,7 +157,7 @@ function Dashboard() {
       </Link>
 
       <p className="mt-6 text-center text-[10px] text-muted-foreground">
-        Built with 💜 by <span className="text-foreground">REHAN SHAIKH</span> · 100% free
+        Built with 💜 for every aspirant · 100% free
       </p>
 
       {showOnboard && (
@@ -234,7 +234,7 @@ function OnboardingSheet({
           Welcome to Nova AI
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Built by REHAN SHAIKH. Personalize karte hain.
+          Chalo, thoda personalize karte hain.
         </p>
 
         <label className="mt-4 block text-xs font-medium text-muted-foreground">
@@ -243,7 +243,7 @@ function OnboardingSheet({
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Rehan"
+          placeholder="e.g. Aarav"
           className="mt-1 w-full rounded-xl bg-input/60 px-3 py-2.5 text-sm outline-none ring-1 ring-white/10 focus:ring-primary"
         />
 
