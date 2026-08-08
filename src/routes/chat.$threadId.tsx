@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Send, Sparkles, Star, Loader2, Mic, Link2, BookOpen, FileText, Brain, Calculator, Map as MapIcon, ListChecks, Lightbulb, Download, Copy, Share2, Volume2, VolumeX, Feather } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Star, Loader2, Mic, Link2, BookOpen, FileText, Brain, Calculator, Map as MapIcon, ListChecks, Lightbulb, Download, Copy, Share2, Volume2, VolumeX, Feather, ImageIcon, X } from "lucide-react";
 import { Markdown, cleanAiText } from "@/components/markdown";
 import { useThreads, type ChatThread } from "@/hooks/use-threads";
 import { toast } from "sonner";
@@ -125,9 +125,37 @@ function ChatPage() {
 
   const isLoading = status === "submitted" || status === "streaming";
 
+  // ---- Image generation mode ----
+  type GenImage = { id: string; prompt: string; url?: string; error?: string };
+  const [imageMode, setImageMode] = useState(false);
+  const [images, setImages] = useState<GenImage[]>([]);
+  const [genLoading, setGenLoading] = useState(false);
+
+  const generateImage = async (prompt: string) => {
+    const id = crypto.randomUUID();
+    setImages((cur) => [...cur, { id, prompt }]);
+    setGenLoading(true);
+    try {
+      const res = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { image?: string; error?: string };
+      if (!res.ok || !data.image) throw new Error(data.error || "Image generation failed");
+      setImages((cur) => cur.map((i) => (i.id === id ? { ...i, url: data.image } : i)));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Image generation failed";
+      setImages((cur) => cur.map((i) => (i.id === id ? { ...i, error: msg } : i)));
+      toast.error("Image ban nahi paayi", { description: msg });
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
   const send = (text: string) => {
     const t = text.trim();
-    if (!t || isLoading) return;
+    if (!t || isLoading || genLoading) return;
     if (t.toLowerCase() === NOVA_SECRET_CODE) {
       localStorage.setItem("nova-boss", "1");
       setBoss(true);
@@ -137,9 +165,15 @@ function ChatPage() {
       });
       return;
     }
+    if (imageMode) {
+      setInput("");
+      void generateImage(t);
+      return;
+    }
     sendMessage({ text: t });
     setInput("");
   };
+
 
 
   // Voice input (Web Speech API)
@@ -294,6 +328,41 @@ function ChatPage() {
               <span>Nova soch raha hai...</span>
             </div>
           )}
+          {images.map((img) => (
+            <div key={img.id} className="flex flex-col items-start gap-1">
+              <div className="max-w-[88%] rounded-2xl gradient-primary px-3.5 py-2.5 text-sm text-primary-foreground self-end">
+                🎨 {img.prompt}
+              </div>
+              <div className="glass w-[88%] overflow-hidden rounded-2xl p-2">
+                {img.url ? (
+                  <>
+                    <img
+                      src={img.url}
+                      alt={img.prompt}
+                      className="w-full rounded-xl"
+                      loading="lazy"
+                    />
+                    <a
+                      href={img.url}
+                      download={`nova-${img.id.slice(0, 6)}.png`}
+                      className="mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-[11px] font-medium hover:bg-white/20"
+                    >
+                      <Download size={12} /> Download image
+                    </a>
+                  </>
+                ) : img.error ? (
+                  <p className="p-2 text-xs text-destructive">{img.error}</p>
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-white/5">
+                    <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
+                      <Loader2 size={18} className="animate-spin" />
+                      Image bana raha hu... 🎨
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
           {error && (
             <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
               {error.message}
@@ -302,9 +371,22 @@ function ChatPage() {
         </div>
       </div>
 
+      {imageMode && (
+        <div className="mb-2 flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-[11px]">
+          <ImageIcon size={13} className="text-primary" />
+          <span className="flex-1">Image mode on — jo likhoge uski picture banegi 🎨</span>
+          <button type="button" onClick={() => setImageMode(false)} aria-label="Exit image mode">
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
       <ToolChips
-        disabled={isLoading}
+        disabled={isLoading || genLoading}
+        imageMode={imageMode}
+        onToggleImage={() => setImageMode((v) => !v)}
         onPick={(prefix) => {
+          setImageMode(false);
           setInput((cur) => (cur.trim() ? `${prefix}: ${cur.trim()}` : `${prefix}: `));
           inputRef.current?.focus();
         }}
@@ -328,7 +410,7 @@ function ChatPage() {
                 send(input);
               }
             }}
-            placeholder="Pucho kuch bhi..."
+            placeholder={imageMode ? "Kaisi image chahiye? Describe karo..." : "Pucho kuch bhi..."}
             rows={1}
             className="max-h-32 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground"
           />
@@ -344,7 +426,7 @@ function ChatPage() {
           </button>
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || genLoading}
             className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-[0_0_20px_-6px_var(--primary)] disabled:opacity-40"
             aria-label="Send"
           >
@@ -352,6 +434,7 @@ function ChatPage() {
           </button>
         </div>
       </form>
+
     </div>
   );
 }
@@ -519,14 +602,32 @@ const TOOLS: { label: string; prefix: string; icon: React.ComponentType<{ size?:
 function ToolChips({
   onPick,
   disabled,
+  imageMode,
+  onToggleImage,
 }: {
   onPick: (prefix: string) => void;
   disabled?: boolean;
+  imageMode?: boolean;
+  onToggleImage?: () => void;
 }) {
   return (
     <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex gap-2 w-max">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={onToggleImage}
+          className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium disabled:opacity-40 ${
+            imageMode
+              ? "gradient-primary border-transparent text-primary-foreground"
+              : "glass border-white/10 hover:bg-white/10"
+          }`}
+        >
+          <ImageIcon size={12} />
+          Image
+        </button>
         {TOOLS.map((t) => {
+
           const Icon = t.icon;
           return (
             <button

@@ -103,7 +103,7 @@ function ProfilePage() {
       </button>
 
       <p className="mt-6 flex items-center justify-center gap-1 text-center text-[11px] text-muted-foreground">
-        Made with <Heart size={11} className="text-primary fill-primary" /> by REHAN SHAIKH
+        Made with <Heart size={11} className="text-primary fill-primary" /> for students
       </p>
       <p className="mt-1 text-center text-[10px] text-muted-foreground">
         Nova AI · 100% free · No subscriptions

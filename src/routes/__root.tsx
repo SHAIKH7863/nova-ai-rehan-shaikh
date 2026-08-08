@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Nova AI by REHAN SHAIKH — premium AI study app for JEE, NEET, UPSC, SSC and all Indian competitive exams. Chat, resources, papers, flashcards, all free.",
+          "Nova AI — premium AI study app for JEE, NEET, UPSC, SSC and all Indian competitive exams. Chat, resources, papers, flashcards, all free.",
       },
       { property: "og:title", content: "Nova AI — Your Study Companion" },
       { name: "twitter:title", content: "Nova AI — Your Study Companion" },
