@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789537235853,
+      "tag": "0000_create_private_nova_memory",
+      "breakpoints": true
+    }
+  ]
+}
