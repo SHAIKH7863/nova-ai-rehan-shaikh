@@ -4,6 +4,7 @@ import { User2, Trash2, Heart } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { useProfile, EXAMS, type ExamKey } from "@/hooks/use-profile";
 import { toast } from "sonner";
+import { useCloudAuth } from "@/hooks/use-cloud-auth";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Nova AI" }] }),
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
+  const { user, profile: cloudProfile } = useCloudAuth();
   const [profile, setProfile] = useProfile();
   const [name, setName] = useState(profile.name);
   const [exam, setExam] = useState<ExamKey | null>(profile.exam);
@@ -38,7 +40,7 @@ function ProfilePage() {
 
   return (
     <div>
-      <AppHeader title="Profile" subtitle="Your study identity" />
+      <AppHeader title="Profile" subtitle={user ? `Signed in as ${cloudProfile?.username ?? "student"}` : "Your study identity"} />
 
       <div className="glass rounded-3xl p-5 text-center">
         <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-3xl gradient-primary shadow-[0_0_32px_-8px_var(--primary)]">
