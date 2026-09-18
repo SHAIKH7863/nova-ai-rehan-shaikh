@@ -36,6 +36,16 @@ export function useThreads() {
         return;
       }
 
+      const accountKey = `nova:threads:${id}`;
+      const accountRaw = localStorage.getItem(accountKey);
+      const accountThreads = accountRaw ? (() => {
+        try {
+          return JSON.parse(accountRaw) as ChatThread[];
+        } catch {
+          return [];
+        }
+      })() : [];
+
       const { data: cloudThreads, error: threadError } = await supabase
         .from("chat_threads")
         .select("id,title,bookmarked,updated_at")
@@ -43,7 +53,7 @@ export function useThreads() {
         .order("updated_at", { ascending: false });
       if (threadError) {
         console.error("Unable to load cloud chats", threadError);
-        setThreads([]);
+        setThreads(accountThreads);
         setHydrated(true);
         return;
       }
@@ -70,7 +80,7 @@ export function useThreads() {
             parts: message.parts as UIMessage["parts"],
           })),
       }));
-      setThreads(cloud);
+      setThreads(cloud.length ? cloud : accountThreads);
       setHydrated(true);
     };
     void load();
