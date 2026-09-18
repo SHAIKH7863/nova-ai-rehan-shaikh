@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -7,6 +8,8 @@ import { Markdown, cleanAiText } from "@/components/markdown";
 import { useThreads, type ChatThread } from "@/hooks/use-threads";
 import { toast } from "sonner";
 import { downloadTextAsPdf } from "@/lib/pdf";
+import { saveMemory } from "@/lib/account.functions";
+import { useCloudAuth } from "@/hooks/use-cloud-auth";
 const NOVA_SECRET_CODE = "nova-boss-786";
 
 
@@ -48,6 +51,8 @@ function greeting() {
 function ChatPage() {
   const { threadId } = Route.useParams();
   const { threads, upsert, toggleBookmark } = useThreads();
+  const { user } = useCloudAuth();
+  const saveMemoryFn = useServerFn(saveMemory);
   const nav = useNavigate();
   const existing = useMemo(
     () => threads.find((t) => t.id === threadId),
@@ -173,6 +178,16 @@ function ChatPage() {
       setInput("");
       void generateImage(t);
       return;
+    }
+    if (user && /\b(yaad rakh|remember|bhoolna mat|memory me save)\b/i.test(t)) {
+      const memoryText = t
+        .replace(/\b(please\s+)?(yaad rakhna|yaad rakh|remember|bhoolna mat|memory me save karo|memory me save)\b[:\s-]*/i, "")
+        .trim();
+      if (memoryText.length >= 2) {
+        void saveMemoryFn({ memory: memoryText.slice(0, 1000), isPrivate: true })
+          .then(() => toast.success("Private memory save ho gayi 🧠"))
+          .catch((e: unknown) => toast.error(e instanceof Error ? e.message : "Memory save nahi ho paayi"));
+      }
     }
     sendMessage({ text: t });
     setInput("");
