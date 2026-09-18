@@ -32,7 +32,7 @@ function ProfilePage() {
     if (!confirm("Clear ALL local data (chats, bookmarks, profile)?")) return;
     [
       "nova:profile",
-      "nova:threads",
+      "nova:threads:guest",
       "nova:bookmarks",
     ].forEach((k) => localStorage.removeItem(k));
     location.href = "/";

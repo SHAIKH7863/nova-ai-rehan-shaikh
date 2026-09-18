@@ -74,7 +74,7 @@ function ChatPage() {
   );
 
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, setMessages, sendMessage, status, error } = useChat({
     id: threadId,
     messages: initialMessages,
     transport,
@@ -83,6 +83,10 @@ function ChatPage() {
       toast.error("AI request failed", { description: e.message });
     },
   });
+
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [threadId, initialMessages, setMessages]);
 
   // Persist messages to localStorage
   useEffect(() => {

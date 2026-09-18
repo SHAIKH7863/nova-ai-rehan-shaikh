@@ -18,7 +18,7 @@ export function useThreads() {
   useEffect(() => {
     let active = true;
     const load = async () => {
-      const raw = localStorage.getItem("nova:threads");
+      const raw = localStorage.getItem("nova:threads:guest");
       let localThreads: ChatThread[] = [];
       try {
         localThreads = raw ? (JSON.parse(raw) as ChatThread[]) : [];
@@ -36,11 +36,18 @@ export function useThreads() {
         return;
       }
 
-      const { data: cloudThreads } = await supabase
+      const { data: cloudThreads, error: threadError } = await supabase
         .from("chat_threads")
         .select("id,title,bookmarked,updated_at")
         .eq("user_id", id)
         .order("updated_at", { ascending: false });
+      if (threadError) {
+        console.error("Unable to load cloud chats", threadError);
+        setThreads([]);
+        setHydrated(true);
+        return;
+      }
+
       const ids = (cloudThreads ?? []).map((thread) => thread.id);
       const { data: cloudMessages } = ids.length
         ? await supabase
@@ -63,7 +70,7 @@ export function useThreads() {
             parts: message.parts as UIMessage["parts"],
           })),
       }));
-      setThreads(cloud.length ? cloud : localThreads);
+      setThreads(cloud);
       setHydrated(true);
     };
     void load();
@@ -74,8 +81,8 @@ export function useThreads() {
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem("nova:threads", JSON.stringify(threads));
-  }, [threads, hydrated]);
+    localStorage.setItem(userId ? `nova:threads:${userId}` : "nova:threads:guest", JSON.stringify(threads));
+  }, [threads, hydrated, userId]);
 
   const saveCloud = useCallback(async (thread: ChatThread, id: string) => {
     const { error } = await supabase.from("chat_threads").upsert({
