@@ -27,7 +27,10 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const emailFor = (value: string) => `${value.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "-")}@nova.local`;
+  const emailFor = (value: string) => {
+    const clean = value.trim().toLowerCase();
+    return clean.includes("@") ? clean : `${clean.replace(/[^a-z0-9._-]/g, "-")}@nova.local`;
+  };
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -43,11 +46,11 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         if (!data.user) throw new Error("Account create nahi ho paaya.");
-        const { error: profileError } = await supabase.from("profiles").insert({
+        const { error: profileError } = await supabase.from("profiles").upsert({
           id: data.user.id,
-          username: cleanUsername,
+          username: cleanUsername.includes("@") ? cleanUsername.split("@")[0] : cleanUsername,
           display_name: displayName.trim(),
-          is_owner: cleanUsername === "shaikhrehanshaikh475",
+          is_owner: email.toLowerCase() === "shaikhrehanshaikh475@gmail.com",
         });
         if (profileError) throw profileError;
         toast.success("Account ready — Nova tumhari chats yaad rakhega. ✨");
@@ -58,7 +61,8 @@ function AuthPage() {
       }
       navigate({ to: "/" });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Sign in failed");
+      const message = error instanceof Error ? error.message : "Sign in failed";
+      toast.error(message.includes("Invalid login credentials") ? "Email ya password galat hai." : message);
     } finally {
       setBusy(false);
     }

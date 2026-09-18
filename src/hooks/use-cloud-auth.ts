@@ -14,8 +14,14 @@ export function useCloudAuth() {
     let active = true;
 
     const load = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
       if (!active) return;
+      if (error) {
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
       const nextUser = data.user ?? null;
       setUser(nextUser);
       if (nextUser) {
